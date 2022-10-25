@@ -76,43 +76,12 @@ namespace Terraria.ModLoader.Engine
 
 		private static bool InstallCheck()
 		{
-#if CLIENT
 			// Check if the content directory is present which is required
 			if (!Directory.Exists(ContentDirectory)) {
 				Exit(Language.GetTextValue("tModLoader.ContentFolderNotFoundInstallCheck", ContentDirectory), Language.GetTextValue("tModLoader.DefaultExtraMessage"));
 				return false;
 			}
-#endif
-			// Whether the steam_api file exists, indicating we'd have to check steam installation
-			if (File.Exists(steamAPIPath))
-				return CheckSteam();
-
 			return CheckGoG();
-		}
-
-		// Check if steam installation is correct
-		private static bool CheckSteam()
-		{
-			Logging.tML.Info("Checking Steam installation...");
-			IsSteam = true;
-#if CLIENT
-			SocialAPI.LoadSteam();
-			string terrariaInstallLocation = Steam.GetSteamTerrariaInstallDir();
-			string terrariaContentLocation = Path.Combine(terrariaInstallLocation, ContentDirectory);
-
-			if (!Directory.Exists(terrariaContentLocation)) {
-				Exit(Language.GetTextValue("tModLoader.VanillaSteamInstallationNotFound"), Language.GetTextValue("tModLoader.DefaultExtraMessage"));
-				return false;
-			}
-#endif
-			if (!HashMatchesFile(steamAPIPath, steamAPIHash)) {
-				Process.Start(@"https://terraria.org");
-				Exit(Language.GetTextValue("tModLoader.SteamAPIHashMismatch"), string.Empty);
-				return false;
-			}
-
-			Logging.tML.Info("Steam installation OK.");
-			return true;
 		}
 
 		// Check if GOG install or manual install is correct
@@ -156,27 +125,13 @@ namespace Terraria.ModLoader.Engine
 				vanillaPath = File.Exists(checkExe) ? checkExe : defaultExe;
 			}
 
-			if (!File.Exists(vanillaPath)) {
-#if SERVER
-				return false;
-#else
-				Exit(Language.GetTextValue("tModLoader.VanillaGOGNotFound", vanillaPath, CheckExe), string.Empty);
-				return false;
-#endif
-			}
-
-			if (!HashMatchesFile(vanillaPath, gogHash)) {
-				Exit(Language.GetTextValue("tModLoader.GOGHashMismatch", vanillaPath), string.Empty);
-				return false;
-			}
-
 			if (Path.GetFileName(vanillaPath) != CheckExe) {
 				string pathToCheckExe = Path.Combine(Path.GetDirectoryName(vanillaPath), CheckExe);
 				Logging.tML.Info($"Backing up {Path.GetFileName(vanillaPath)} to {CheckExe}");
 				File.Copy(vanillaPath, pathToCheckExe);
 			}
 
-			Logging.tML.Info("GOG or manual installation OK.");
+			Logging.tML.Info("Cracked Version is looking fine ;).");
 			return true;
 		}
 	}
